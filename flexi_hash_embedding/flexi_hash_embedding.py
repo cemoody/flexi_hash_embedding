@@ -7,7 +7,7 @@ from sklearn.feature_extraction import FeatureHasher
 
 
 class FlexiHashEmbedding(nn.Module):
-    def __init__(self, n_features=1048576, dim=128):
+    def __init__(self, n_features=1048576, dim=128, embedding=nn.Embedding):
         """Differentiably embed and sum a variable-length number of features
         a single fixed-size embedding per row. Feature keys are hashed, which
         is ideal for online-learning such that we don't have to memorize a
@@ -31,7 +31,7 @@ class FlexiHashEmbedding(nn.Module):
         super().__init__()
         self.n_features = n_features
         self.hasher = FeatureHasher(self.n_features, alternate_sign=False)
-        self.embed = nn.Embedding(n_features, dim)
+        self.embed = embedding(n_features, dim)
 
     def _move(self, arr, device=None):
         """ Transfer the input numpy array to the correct device
@@ -52,10 +52,13 @@ class FlexiHashEmbedding(nn.Module):
         feature_index = self._move(Xcoo.col.astype(np.int64))
         # embed_index is of size number of rows, e.g. n_rows=len(X)
         embed_index = self._move(Xcoo.row.astype(np.int64))
+        scaling = self._move(Xcoo.data.astype(np.float32))
         # This is of size (n_total_features, n_dim)
         feature_embed = self.embed(feature_index)
+        # This scales the embedding by the feature value
+        feature_scale = feature_embed * scaling[:, None]
         # To understand scatter add see:
         # https://pytorch-scatter.readthedocs.io/en/latest/functions/add.html
         # summed is of size (n_rows, n_dim)
-        summed = scatter_add(feature_embed.t(), embed_index[None, :]).t()
+        summed = scatter_add(feature_scale, embed_index, dim=0)
         return summed

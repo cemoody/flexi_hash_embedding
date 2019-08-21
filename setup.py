@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 url = 'https://github.com/cemoody/flexi_hash_embedding'
 
 install_requires = ['torch', 'torch-scatter', 'sklearn']

@@ -16,11 +16,10 @@ class FlexiHashEmbedding(nn.Module):
 
         Arguments
         ---------
-        n_hashes: int
-        p: float < 0
-            Pick n_features to minimize hash collisions to a probability p. 
-            The number of
-            unique hashes n=sqrt(2 * n_features * p)
+        n_features: int
+            Pick n_features to minimize hash collisions
+        dim: int
+            Dimensionality of each embedding
 
         >>> X = [{'age': 16, 'spend': -2, 'height':4}, {'age': 2, 'boho': -5}]
         >>> embed = HashEmbedding()

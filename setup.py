@@ -1,13 +1,16 @@
 from setuptools import setup, find_packages
 
 __version__ = '0.0.1'
-url = 'https://github.com/cemoody/torch_hash_embedding'
+url = 'https://github.com/cemoody/flexi_hash_embedding'
 
 install_requires = ['torch', 'torch-scatter', 'sklearn']
 tests_require = ['pytest']
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(
-    name='torch_hash_embedding',
+    name='flexi_hash_embedding',
     version=__version__,
     description='PyTorch Extension Library of Optimized Scatter Operations',
     author='Christopher Moody',
@@ -17,10 +20,20 @@ setup(
     keywords=[
         'pytorch',
         'scatter',
+        'groupby',
         'embedding',
-        'hashing'
+        'hashing',
+        'variable',
+        'fixed'
     ],
     install_requires=install_requires,
     tests_require=tests_require,
     packages=find_packages(),
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
 )

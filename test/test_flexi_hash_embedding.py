@@ -1,3 +1,4 @@
+import numpy as np
 from flexi_hash_embedding.flexi_hash_embedding import FlexiHashEmbedding
 
 
@@ -12,7 +13,7 @@ def test_sum():
          {'age': 16, 'spend': -2, 'boho':1},
          {'height': 4},
          {'boho': 1}]
-    y = emb(X).weight.data.cpu().numpy()
+    y = emb(X).data.cpu().numpy()
     # c0 = age + spend + height - height
     c0 = y[0] - y[2]
     # c1 = age + spend + boho - boho
@@ -33,7 +34,7 @@ def test_zalgo_text():
     emb = FlexiHashEmbedding()
     for case in cases:
         X = [{case: 1}, {case: 2}]
-        y = emb(X).weight.data.cpu().numpy()
+        y = emb(X).data.cpu().numpy()
         assert np.allclose(y[0], y[1])
 
 
@@ -44,7 +45,7 @@ def test_zero():
     X = [{'boho': 0},
          {'boho': 1},
          {'boho': 2}]
-    y = emb(X).weight.data.cpu().numpy()
+    y = emb(X).data.cpu().numpy()
     c0 = y[0]
     c1 = y[1] 
     c2 = y[2]

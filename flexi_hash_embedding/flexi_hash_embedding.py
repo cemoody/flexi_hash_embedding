@@ -57,5 +57,5 @@ class FlexiHashEmbedding(nn.Module):
         # To understand scatter add see:
         # https://pytorch-scatter.readthedocs.io/en/latest/functions/add.html
         # summed is of size (n_rows, n_dim)
-        summed = scatter_add(feature_embed, embed_index)
+        summed = scatter_add(feature_embed.t(), embed_index[None, :]).t()
         return summed

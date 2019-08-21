@@ -7,10 +7,12 @@ is ideal for streaming contexts and online-learning
 such that we don't have to memorize a
 mapping between feature keys and indices.
 Multiple variable-length features are grouped by example
-and then summed.
+and then summed. Feature embeddings are scaled by their
+values, enabling linear features rather than just one-hot
+features.
 
-Uses the wonderful [torch scatter](https://github.com/rusty1s/pytorch_scatter) library
-and sklearn's feature hashing under the hood.
+Uses the wonderful [torch scatter](https://github.com/rusty1s/pytorch_scatter)
+library and sklearn's feature hashing under the hood.
 
 So for example:
 
@@ -27,13 +29,17 @@ tensor([[  1.0753,  -5.3999,   2.6890,   2.4224,  -2.8352],
 
 ## Example
 Frequently, we'll have data for a single event or user
-that's, for example, in a JSON blob format.
-Features may be missing, incomplete or never before seen.
-Furthermore, there's a variable number of features defined.
+that's, for example, in a JSON blob format which lends itself
+to features which may be missing, incomplete or never before seen.
+Furthermore, there may be a variable number of features defined.
+This use case is ideal for feature hashing and for groupby summing
+of feature embeddings.
 
-So even if we have a total of six features spread
+In this example we have a total of six features across our whole dataset,
+but we compute three vectors, one for every input row:
 
 ![img](https://i.imgur.com/OBkiM7T.png)
+
 
 In the example above we have a total of six features but they're
 spread out across three clients. The first client has three active
@@ -50,8 +56,9 @@ and the third client's vector is just a single feature.
 
 ## Speed
 
-A large batchsize of 4096 with on average 5 features per row equates
-to about 20,000 total features. This module will hash that many features
+Online feature hasing and groupby are relatively fast. 
+For a large batchsize of 4096 with on average 5 features per row
+equals 20,000 total features. This module will hash that many features
 in about 20ms on a modern MacBook Pro.
 
 ## Installation
@@ -74,5 +81,3 @@ python3 setup.py sdist bdist_wheel
 twine upload dist/*
 pip install --index-url https://pypi.org/simple/ --no-deps flexi_hash_embedding
 ```
-
-

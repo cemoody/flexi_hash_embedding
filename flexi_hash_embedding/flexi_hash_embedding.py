@@ -7,7 +7,10 @@ from sklearn.feature_extraction import FeatureHasher
 
 
 class FlexiHashEmbedding(nn.Module):
-    def __init__(self, n_features=1048576, dim=128, embedding=nn.Embedding):
+    cache = {}
+
+    def __init__(self, n_features=1048576, dim=128, embedding=nn.Embedding,
+                 use_cache=False):
         """Differentiably embed and sum a variable-length number of features
         a single fixed-size embedding per row. Feature keys are hashed, which
         is ideal for online-learning such that we don't have to memorize a
@@ -20,6 +23,9 @@ class FlexiHashEmbedding(nn.Module):
             Pick n_features to minimize hash collisions
         dim: int
             Dimensionality of each embedding
+        use_cache: bool
+            Cache hashed embedding inputs. Useful when calling
+            FlexiHashEmbedding repeatedly with the same arguments.
 
         >>> X = [{'age': 16, 'spend': -2, 'height':4}, {'age': 2, 'boho': -5}]
         >>> embed = HashEmbedding()
@@ -31,6 +37,7 @@ class FlexiHashEmbedding(nn.Module):
         self.n_features = n_features
         self.hasher = FeatureHasher(self.n_features, alternate_sign=False)
         self.embed = embedding(n_features, dim)
+        self.use_cache = use_cache
 
     def _move(self, arr, device=None):
         """ Transfer the input numpy array to the correct device
@@ -40,9 +47,17 @@ class FlexiHashEmbedding(nn.Module):
         tarr = torch.from_numpy(arr).to(device)
         return tarr
 
-    def __call__(self, X):
+    def _tocoo(self, X):
+        if id(X) in self.cache:
+            return self.cache[id(X)]
         Xcsr = self.hasher.transform(X)
         Xcoo = Xcsr.tocoo()
+        if self.use_cache:
+            self.cache[id(X)] = Xcoo
+        return Xcoo
+
+    def __call__(self, X):
+        Xcoo = self._tocoo(X)
         # feature_index is of length n_total_features, 
         # e.g. the size of the concatenated list
         # of all variable-length features.
